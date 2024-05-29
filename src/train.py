@@ -6,6 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 from Pho2Vis import Pho2Vis
 from data_processing import get_dataloader, get_scaler
+from test import test, write_results
 import os
 # set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -90,7 +91,7 @@ def main():
     test_file = './new_May_25/test_labels.csv'
     train_image_dir = './new_May_25/train_mask_rename'
     test_image_dir = './new_May_25/test_mask_rename'
-    output_file = './models/visibility_model.pth'
+    output_file = './models/tmp_visibility_model.pth'
     batch_size = 16
     num_epochs = 1
     numerical_features = 4
@@ -101,9 +102,13 @@ def main():
 
     model = Pho2Vis(numerical_features=numerical_features)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     trained_model = train(model, train_loader, test_loader, optimizer, criterion, num_epochs)
+
+    # 测试模型
+    mse, rmse, mae, r2 = test(trained_model, test_loader)
+    write_results(mse, rmse, mae, r2, './results/tmp_results.txt')
 
     # Save the model
     torch.save(trained_model.state_dict(), output_file)
