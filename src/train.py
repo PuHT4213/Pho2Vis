@@ -38,9 +38,6 @@ def batch_dealer(batch, device):
 
     return images0, images1, numerical_features, visibility
 
-
-
-
 def train(model, train_loader, val_loader, optimizer, criterion, num_epochs=25):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -93,6 +90,7 @@ def main():
     test_file = './new_May_25/test_labels.csv'
     train_image_dir = './new_May_25/train_mask_rename'
     test_image_dir = './new_May_25/test_mask_rename'
+    output_file = './models/visibility_model.pth'
     batch_size = 16
     num_epochs = 1
     numerical_features = 4
@@ -108,7 +106,7 @@ def main():
     trained_model = train(model, train_loader, test_loader, optimizer, criterion, num_epochs)
 
     # Save the model
-    torch.save(trained_model.state_dict(), 'visibility_model.pth')
+    torch.save(trained_model.state_dict(), output_file)
 
 if __name__ == "__main__":
     main()
