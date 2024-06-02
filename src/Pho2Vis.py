@@ -9,19 +9,18 @@ class Pho2Vis(nn.Module):
         self.numerical_features = numerical_features
         # 加载预训练的InceptionV3模型,冻结前面的层
         self.inception = models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT)
-        for param in self.inception.parameters():
-            param.requires_grad = False
+        # for param in self.inception.parameters():
+        #     param.requires_grad = False
         # 移除辅助输出和全连接层
         self.inception.fc = nn.Identity()
         self.inception.aux_logits = False
-
         # 1x1卷积层，用于将两个特征图在通道维度上堆叠
-        self.conv1x1 = nn.Conv1d(in_channels=2, out_channels=1, kernel_size=2, stride=2)
+        self.conv1x1 = nn.Conv1d(in_channels=2, out_channels=1, kernel_size=3, padding=1)
 
         # 全连接层
-        self.fc1 = nn.Linear(1024 + self.numerical_features, 512)  # 假设数值特征有3个维度
-        self.fc2 = nn.Linear(512 + self.numerical_features, 512)
-        self.fc3 = nn.Linear(512, 1)
+        self.fc1 = nn.Linear(2048 + self.numerical_features, 1024)  # 假设数值特征有3个维度
+        self.fc2 = nn.Linear(1024 + self.numerical_features, 1024)
+        self.fc3 = nn.Linear(1024, 1)
 
         # 激活函数和最终的缩放倍数
         self.sigmoid = nn.Sigmoid()
@@ -37,11 +36,12 @@ class Pho2Vis(nn.Module):
         features1 = features1.unsqueeze(1)
 
         # 将特征图在通道维度上堆叠
-        # print(features0.shape, features1.shape)
+        print(features0.shape, features1.shape)
         combined_features = torch.cat((features0, features1), dim=1)
         # combined_features = combined_features.permute(0, 2, 1)
-        # print(combined_features.shape)
+        print(combined_features.shape)
         combined_features = self.conv1x1(combined_features)
+        print(combined_features.shape)
         combined_features = combined_features.squeeze(1)
         
         # 平坦化特征图
@@ -72,5 +72,5 @@ if __name__ == "__main__":
     print(image.shape, numerical_features.shape)
     model = Pho2Vis()
     output = model(image, image, numerical_features)
-    print(output.shape)  # 应该输出 (batch_size, 1)
+    # print(output.shape)  # 应该输出 (batch_size, 1)
     # print(model)  # 打印模型结构

@@ -87,13 +87,13 @@ def train(model, train_loader, val_loader, optimizer, criterion, num_epochs=25):
 
 def main():
     # 获取当前目录
-    train_file = './new_May_25/train_labels.csv'
-    test_file = './new_May_25/test_labels.csv'
-    train_image_dir = './new_May_25/train_mask_rename'
-    test_image_dir = './new_May_25/test_mask_rename'
+    train_file = './data/train_labels.csv'
+    test_file = './data/test_labels.csv'
+    train_image_dir = './data/train_mask_rename'
+    test_image_dir = './data/test_mask_rename'
     output_file = './models/tmp_visibility_model.pth'
     batch_size = 16
-    num_epochs = 1
+    num_epochs = 60
     numerical_features = 4
     target_size = (299, 299)
 
@@ -102,7 +102,7 @@ def main():
 
     model = Pho2Vis(numerical_features=numerical_features)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=5e-5)
 
     trained_model = train(model, train_loader, test_loader, optimizer, criterion, num_epochs)
 

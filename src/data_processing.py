@@ -19,6 +19,8 @@ class VisibilityDataset(Dataset):
         self.label_data = pd.read_csv(label_file)
         self.label_data['Time'] = pd.to_datetime(self.label_data['Time'], format='%Y/%m/%d %H:%M')
         self.label_data.ffill(inplace=True)  # Forward fill to handle missing values
+        # 丢弃存在缺失值的行
+        # self.label_data.dropna(inplace=True)
         self.label_data['Month'] = self.label_data['Time'].dt.month
         self.label_data['Hour'] = self.label_data['Time'].dt.hour
         if scaler:
@@ -87,10 +89,7 @@ def get_dataloader(image_dir, label_file, batch_size=16,target_size=(299, 299)):
 
 # Example usage
 if __name__ == '__main__':
-    train_loader = get_dataloader('./new_May_25/train_mask_rename', './new_May_25/train_labels.csv')
-    test_loader = get_dataloader('./new_May_25/test_mask_rename', './new_May_25/test_labels.csv')
-    for i, data in enumerate(train_loader):
-        print(i, data['image0'].shape, data['visibility'].shape)
-        # print(data)
-        if i == 0:
-            break
+    train_loader = get_dataloader('./data/train_mask_rename', './data/train_labels.csv')
+    test_loader = get_dataloader('./data/test_mask_rename', './data/test_labels.csv')
+    # 打印一共有多少数据
+    print(len(train_loader.dataset), len(test_loader.dataset))

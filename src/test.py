@@ -1,9 +1,35 @@
 import torch
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from train import batch_dealer
 from data_processing import get_dataloader
 from Pho2Vis import Pho2Vis
+
+def batch_dealer(batch, device):
+    # 图片数据
+    images0 = batch['image0'].to(device)
+    images1 = batch['image1'].to(device)
+    # 数值特征
+    aod = batch['aod'].to(device)
+    rh = batch['rh'].to(device)
+    month = batch['month'].to(device)
+    Hour = batch['Hour'].to(device)
+    # 增加一个维度，以便在通道维度上拼接
+    aod = aod.unsqueeze(1)
+    rh = rh.unsqueeze(1)
+    month = month.unsqueeze(1)
+    Hour = Hour.unsqueeze(1)
+
+    numerical_features = torch.cat((aod, rh, month, Hour), dim=1)
+    # print(Hour.shape,numerical_features.shape)
+    # 可见度
+    visibility = batch['visibility'].to(device).view(-1, 1)
+    # 全部转换为torch.float
+    images0 = images0.float()
+    images1 = images1.float()
+    numerical_features = numerical_features.float()
+    visibility = visibility.float()
+
+    return images0, images1, numerical_features, visibility
 
 def test(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -46,8 +72,8 @@ def write_results(mse, rmse, mae, r2, output_file):
 def main():
     model_name = 'visibility_model_nofixed_1'
     model_path = './models/' + model_name + '.pth'
-    output_file = './results'+ model_name + '.txt'
-    test_loader = get_dataloader('./new_May_25/test_mask_rename', './new_May_25/test_labels.csv')
+    output_file = './results/'+ model_name + '.txt'
+    test_loader = get_dataloader('./data/test_mask_rename', './data/test_labels.csv')
 
     model = Pho2Vis(numerical_features=4)
     if torch.cuda.is_available():
